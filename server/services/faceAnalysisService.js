@@ -220,7 +220,7 @@ Return ONLY the JSON object. Ensure values are distinct and logically consistent
           }
         ],
         max_completion_tokens: 2000, // Balanced limit for thorough but faster analysis
-        reasoning_effort: 'medium', // Medium reasoning effort for balance between speed and accuracy
+        // Temporarily removed reasoning_effort to debug empty response issue
         response_format: { type: 'json_object' }
         // Note: GPT-5 only supports default temperature (1), so we don't set it
       });
