@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import client from '../api/client';
 
 type Pose = 'center' | 'left' | 'right' | 'up' | 'down';
@@ -78,12 +79,27 @@ export default function ScanScreen() {
     }
   };
 
+  // Save scan locally
+  const saveScanLocally = async (scan: any) => {
+    try {
+      const stored = await AsyncStorage.getItem('scans');
+      const scans = stored ? JSON.parse(stored) : [];
+      scans.unshift(scan); // Add to beginning
+      await AsyncStorage.setItem('scans', JSON.stringify(scans));
+    } catch (error) {
+      console.error('Failed to save scan locally:', error);
+    }
+  };
+
   const processImages = async (images: string[]) => {
     setIsProcessing(true);
     try {
       const response = await client.post('/scans', { images });
 
       if (response.data && response.data.id) {
+        // Save scan locally
+        await saveScanLocally(response.data);
+        
         setIsScanning(false);
         setCurrentPosition('Ready to scan');
         setScanProgress(0);

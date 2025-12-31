@@ -106,12 +106,74 @@ export default function ScansScreen() {
   const [showSearch, setShowSearch] = useState(false);
   const [visibleScan, setVisibleScan] = useState<Scan | null>(null);
 
+  // Save scans to local storage
+  const saveScansLocally = async (scansToSave: Scan[]) => {
+    try {
+      await AsyncStorage.setItem('scans', JSON.stringify(scansToSave));
+    } catch (error) {
+      console.error('Failed to save scans locally:', error);
+    }
+  };
+
+  // Load scans from local storage
+  const loadScansLocally = async (): Promise<Scan[]> => {
+    try {
+      const stored = await AsyncStorage.getItem('scans');
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (error) {
+      console.error('Failed to load scans locally:', error);
+    }
+    return [];
+  };
+
   const fetchScans = async () => {
     try {
-      const response = await client.get('/scans');
-      setScans(response.data);
+      // First, load local scans to show immediately
+      const localScans = await loadScansLocally();
+      if (localScans.length > 0) {
+        setScans(localScans);
+        setLoading(false);
+      }
+
+      // Then try to fetch from server
+      try {
+        const response = await client.get('/scans');
+        const serverScans = response.data || [];
+        
+        // Merge local and server scans, prioritizing server data
+        // Combine and deduplicate by ID
+        const allScans = [...serverScans];
+        localScans.forEach((localScan: Scan) => {
+          if (!serverScans.find((s: Scan) => s.id === localScan.id)) {
+            allScans.push(localScan);
+          }
+        });
+        
+        // Sort by date (newest first)
+        allScans.sort((a, b) => 
+          new Date(b.scan_date).getTime() - new Date(a.scan_date).getTime()
+        );
+        
+        setScans(allScans);
+        // Save merged scans locally
+        await saveScansLocally(allScans);
+      } catch (serverError) {
+        // If server fails, use local scans (already set above)
+        console.error('Failed to fetch scans from server:', serverError);
+        if (localScans.length === 0) {
+          // No local scans either, show error
+          console.error('No scans available locally or from server');
+        }
+      }
     } catch (error) {
       console.error('Failed to fetch scans:', error);
+      // Try to load local scans as fallback
+      const localScans = await loadScansLocally();
+      if (localScans.length > 0) {
+        setScans(localScans);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
