@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,14 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { format } from 'date-fns';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 interface Scan {
   id: number;
@@ -22,7 +27,7 @@ interface Scan {
 }
 
 type RootStackParamList = {
-  ScanDetail: { scan: Scan };
+  ScanDetail: { scans: Scan[]; initialIndex: number };
 };
 
 type ScanDetailRouteProp = RouteProp<RootStackParamList, 'ScanDetail'>;
@@ -82,12 +87,92 @@ function MetricCard({
 export default function ScanDetailScreen() {
   const route = useRoute<ScanDetailRouteProp>();
   const navigation = useNavigation();
-  const { scan } = route.params;
+  const { scans, initialIndex } = route.params;
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
-  const imageUri = scan.image_path
-    ? `data:image/jpeg;base64,${scan.image_path}`
-    : null;
-  const dateTime = format(new Date(scan.scan_date), 'MMM dd, yyyy HH:mm');
+  // Scroll to initial index on mount
+  useEffect(() => {
+    if (scrollViewRef.current && initialIndex > 0) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({
+          x: initialIndex * screenWidth,
+          animated: false,
+        });
+      }, 100);
+    }
+  }, [initialIndex]);
+
+  const currentScan = scans[currentIndex];
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(contentOffsetX / screenWidth);
+    if (index !== currentIndex && index >= 0 && index < scans.length) {
+      setCurrentIndex(index);
+    }
+  };
+
+  const renderScanDetail = (scan: Scan, index: number) => {
+    const imageUri = scan.image_path
+      ? `data:image/jpeg;base64,${scan.image_path}`
+      : null;
+    const dateTime = format(new Date(scan.scan_date), 'MMM dd, yyyy HH:mm');
+
+    return (
+      <View key={scan.id} style={styles.scanPage}>
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <View style={styles.imageContainer}>
+            {imageUri ? (
+              <Image 
+                source={{ uri: imageUri }} 
+                style={[styles.detailImage, styles.mirroredImage]} 
+                resizeMode="cover" 
+              />
+            ) : (
+              <View style={[styles.detailImage, styles.placeholderImage]}>
+                <Text style={styles.placeholderText}>No Image</Text>
+              </View>
+            )}
+            <Text style={styles.dateText}>{dateTime}</Text>
+          </View>
+
+          <View style={styles.metricsSection}>
+            <Text style={styles.sectionTitle}>Metrics</Text>
+            <View style={styles.metricsGrid}>
+              <MetricCard
+                label="Water Retention"
+                value={scan.water_retention}
+                unit="%"
+                trend="down"
+              />
+              <MetricCard
+                label="Puffiness Index"
+                value={scan.inflammation_index}
+                trend="down"
+              />
+              <MetricCard
+                label="Lymph Congestion"
+                value={scan.lymph_congestion_score}
+                trend="down"
+              />
+              <MetricCard
+                label="Definition Score"
+                value={scan.definition_score}
+                trend="up"
+              />
+              <MetricCard
+                label="Facial Fat Layer"
+                value={scan.facial_fat_layer}
+                unit="%"
+                trend="down"
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -98,66 +183,36 @@ export default function ScanDetailScreen() {
         >
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Scan Details</Text>
+        <Text style={styles.headerTitle}>
+          Scan {currentIndex + 1} of {scans.length}
+        </Text>
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.scrollView}>
-        <TouchableOpacity 
-          style={styles.imageContainer}
-          onPress={() => {
-            // Go back to the Progress screen (maintains scroll position)
-            navigation.goBack();
-          }}
-          activeOpacity={0.9}
-        >
-          {imageUri ? (
-            <Image 
-              source={{ uri: imageUri }} 
-              style={[styles.detailImage, styles.mirroredImage]} 
-              resizeMode="cover" 
-            />
-          ) : (
-            <View style={[styles.detailImage, styles.placeholderImage]}>
-              <Text style={styles.placeholderText}>No Image</Text>
-            </View>
-          )}
-          <Text style={styles.dateText}>{dateTime}</Text>
-        </TouchableOpacity>
-
-        <View style={styles.metricsSection}>
-          <Text style={styles.sectionTitle}>Metrics</Text>
-          <View style={styles.metricsGrid}>
-            <MetricCard
-              label="Water Retention"
-              value={scan.water_retention}
-              unit="%"
-              trend="down"
-            />
-            <MetricCard
-              label="Puffiness Index"
-              value={scan.inflammation_index}
-              trend="down"
-            />
-            <MetricCard
-              label="Lymph Congestion"
-              value={scan.lymph_congestion_score}
-              trend="down"
-            />
-            <MetricCard
-              label="Definition Score"
-              value={scan.definition_score}
-              trend="up"
-            />
-            <MetricCard
-              label="Facial Fat Layer"
-              value={scan.facial_fat_layer}
-              unit="%"
-              trend="down"
-            />
-          </View>
-        </View>
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        style={styles.carousel}
+      >
+        {scans.map((scan, index) => renderScanDetail(scan, index))}
       </ScrollView>
+
+      {/* Pagination dots */}
+      <View style={styles.pagination}>
+        {scans.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.paginationDot,
+              index === currentIndex && styles.paginationDotActive,
+            ]}
+          />
+        ))}
+      </View>
     </View>
   );
 }
@@ -192,43 +247,68 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 60,
   },
-        scrollView: {
-          flex: 1,
-        },
-        imageContainer: {
-          margin: 20,
-          marginBottom: 10,
-          borderRadius: 10,
-          overflow: 'hidden',
-          backgroundColor: '#2a2a2a',
-        },
-        detailImage: {
-          width: '100%',
-          aspectRatio: 0.75,
-        },
-        mirroredImage: {
-          transform: [{ scaleX: -1 }],
-        },
-        placeholderImage: {
-          backgroundColor: '#2a2a2a',
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-        placeholderText: {
-          color: '#666',
-          fontSize: 16,
-        },
-        dateText: {
-          color: '#fff',
-          fontSize: 16,
-          fontWeight: '600',
-          padding: 15,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        },
-        metricsSection: {
-          padding: 20,
-          paddingTop: 10,
-        },
+  carousel: {
+    flex: 1,
+  },
+  scanPage: {
+    width: screenWidth,
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  imageContainer: {
+    margin: 20,
+    marginBottom: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#2a2a2a',
+  },
+  detailImage: {
+    width: '100%',
+    aspectRatio: 0.75,
+  },
+  mirroredImage: {
+    transform: [{ scaleX: -1 }],
+  },
+  placeholderImage: {
+    backgroundColor: '#2a2a2a',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    color: '#666',
+    fontSize: 16,
+  },
+  dateText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    padding: 15,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  metricsSection: {
+    padding: 20,
+    paddingTop: 10,
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingBottom: 30,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#666',
+    marginHorizontal: 4,
+  },
+  paginationDotActive: {
+    backgroundColor: '#2196F3',
+    width: 24,
+  },
   sectionTitle: {
     color: '#fff',
     fontSize: 20,

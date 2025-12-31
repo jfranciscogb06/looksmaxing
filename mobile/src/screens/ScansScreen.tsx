@@ -360,7 +360,11 @@ export default function ScansScreen() {
                   { height: height - 100 }, // Screen height minus tab bar (~100px)
                 ]}
                 onPress={() => {
-                  navigation.navigate('ScanDetail', { scan });
+                  const scanIndex = filteredScans.findIndex(s => s.id === scan.id);
+                  navigation.navigate('ScanDetail', { 
+                    scans: filteredScans, 
+                    initialIndex: scanIndex >= 0 ? scanIndex : 0 
+                  });
                 }}
                 activeOpacity={0.9}
               >
