@@ -157,6 +157,15 @@ export default function ScansScreen() {
         // Overwrite with server scans (prioritize server data)
         serverScans.forEach((scan: Scan) => {
           if (scan.id) {
+            // Parse image_path if it's a JSON string (for backward compatibility)
+            if (scan.image_path && typeof scan.image_path === 'string' && scan.image_path.startsWith('[')) {
+              try {
+                scan.image_path = JSON.parse(scan.image_path);
+              } catch (e) {
+                // If parsing fails, keep as is
+                console.warn('Failed to parse image_path for scan', scan.id);
+              }
+            }
             scanMap.set(scan.id, scan);
           }
         });
