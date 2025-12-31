@@ -232,41 +232,7 @@ Return ONLY the JSON object. Ensure values are distinct and logically consistent
         code: apiError.code,
         type: apiError.type
       });
-      // If gpt-5 fails (model not found/not available), try falling back to gpt-4o
-      if (apiError.message && (
-        apiError.message.includes('model') || 
-        apiError.code === 'model_not_found' ||
-        apiError.status === 404
-      )) {
-        console.warn('GPT-5 not available, trying GPT-4o...');
-        try {
-          response = await client.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [
-              {
-                role: 'system',
-                content: 'You are a consistent facial biometric analyst. Assign precise numeric scores (0-100) based on visual assessment. Each metric must have a different value. Use the provided scoring anchors as reference points for consistency across analyses.'
-              },
-              {
-                role: 'user',
-                content: [
-                  { type: 'text', text: prompt },
-                  ...imageContents
-                ]
-              }
-            ],
-            max_tokens: 500, // gpt-4o still uses max_tokens
-            temperature: 0.3,
-            response_format: { type: 'json_object' }
-          });
-          console.log('OpenAI API call successful with GPT-4o fallback');
-        } catch (fallbackError) {
-          console.error('Fallback to GPT-4o also failed:', fallbackError);
-          throw new Error(`OpenAI API error: ${apiError.message}`);
-        }
-      } else {
       throw new Error(`OpenAI API error: ${apiError.message}`);
-      }
     }
 
     const content = response.choices[0]?.message?.content;
