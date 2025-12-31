@@ -38,7 +38,7 @@ const SearchIcon = () => (
 interface Scan {
   id: number;
   scan_date: string;
-  image_path?: string | null;
+  image_path?: string | string[] | null; // Can be single image (string) or array of images
   water_retention: number;
   inflammation_index: number;
   lymph_congestion_score: number;
@@ -354,8 +354,17 @@ export default function ScansScreen() {
           }}
         >
           {filteredScans.map((scan) => {
-            const imageUri = scan.image_path
-              ? `data:image/jpeg;base64,${scan.image_path}`
+            // Get first image - handle both array and string formats
+            let firstImage: string | null = null;
+            if (scan.image_path) {
+              if (Array.isArray(scan.image_path)) {
+                firstImage = scan.image_path[0] || null;
+              } else {
+                firstImage = scan.image_path;
+              }
+            }
+            const imageUri = firstImage
+              ? `data:image/jpeg;base64,${firstImage}`
               : null;
             const dateTime = format(
               new Date(scan.scan_date),
