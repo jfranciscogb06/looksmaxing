@@ -79,12 +79,22 @@ export default function ScanScreen() {
     }
   };
 
-  // Save scan locally
+  // Save scan locally (check for duplicates first)
   const saveScanLocally = async (scan: any) => {
     try {
       const stored = await AsyncStorage.getItem('scans');
       const scans = stored ? JSON.parse(stored) : [];
-      scans.unshift(scan); // Add to beginning
+      
+      // Check if scan with this ID already exists
+      const existingIndex = scans.findIndex((s: any) => s.id === scan.id);
+      if (existingIndex >= 0) {
+        // Replace existing scan with new one
+        scans[existingIndex] = scan;
+      } else {
+        // Add new scan to beginning
+        scans.unshift(scan);
+      }
+      
       await AsyncStorage.setItem('scans', JSON.stringify(scans));
     } catch (error) {
       console.error('Failed to save scan locally:', error);
