@@ -43,13 +43,13 @@ export async function checkFacePosition(imageBase64, requiredPose = 'center') {
       }
     };
 
-    // Map pose names to simple questions (including obstruction check)
+    // Map pose names to simple questions (including obstruction and glasses check)
     const poseQuestions = {
-      'center': 'Does it look like a user is looking straight ahead at the camera AND there are no objects in the way?',
-      'left': 'Does it look like a user is looking to their left AND there are no objects in the way?',
-      'right': 'Does it look like a user is looking to their right AND there are no objects in the way?',
-      'up': 'Does it look like a user is looking up AND there are no objects in the way?',
-      'down': 'Does it look like a user is looking down AND there are no objects in the way?'
+      'center': 'Does it look like a user is looking straight ahead at the camera, there are no objects in the way, AND they are NOT wearing glasses?',
+      'left': 'Does it look like a user is looking to their left, there are no objects in the way, AND they are NOT wearing glasses?',
+      'right': 'Does it look like a user is looking to their right, there are no objects in the way, AND they are NOT wearing glasses?',
+      'up': 'Does it look like a user is looking up, there are no objects in the way, AND they are NOT wearing glasses?',
+      'down': 'Does it look like a user is looking down, there are no objects in the way, AND they are NOT wearing glasses?'
     };
 
     const poseQuestion = poseQuestions[requiredPose.toLowerCase()] || poseQuestions['center'];
@@ -63,8 +63,12 @@ Return ONLY a JSON object with this EXACT structure:
 }
 
 RULES:
-- correctPosition: true if it looks like a user is ${requiredPose === 'center' ? 'looking straight ahead' : requiredPose === 'left' ? 'looking to their left' : requiredPose === 'right' ? 'looking to their right' : requiredPose === 'up' ? 'looking up' : 'looking down'} AND there are no objects blocking their face (no hands, objects, or significant obstructions). Be lenient - if they are approximately in the correct position and clearly visible, return true.
-- message: Brief explanation like "User is looking ${requiredPose === 'center' ? 'straight ahead' : requiredPose}" or "User is not looking ${requiredPose === 'center' ? 'straight ahead' : requiredPose}" or "No user detected" or "Face is obstructed"
+- correctPosition: true ONLY if ALL of the following are true:
+  1. It looks like a user is ${requiredPose === 'center' ? 'looking straight ahead' : requiredPose === 'left' ? 'looking to their left' : requiredPose === 'right' ? 'looking to their right' : requiredPose === 'up' ? 'looking up' : 'looking down'}
+  2. There are no objects blocking their face (no hands, objects, or significant obstructions)
+  3. The user is NOT wearing glasses (eyeglasses/sunglasses) - glasses obstruct facial analysis and must be removed
+  Be lenient on position - if they are approximately in the correct position and clearly visible, return true. But be strict on glasses - if glasses are visible, return false.
+- message: Brief explanation like "User is looking ${requiredPose === 'center' ? 'straight ahead' : requiredPose}" or "User is not looking ${requiredPose === 'center' ? 'straight ahead' : requiredPose}" or "No user detected" or "Face is obstructed" or "Please remove glasses for accurate scanning"
 
 Return ONLY the JSON, no other text.`;
 
