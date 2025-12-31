@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -87,23 +87,39 @@ function MetricCard({
 export default function ScanDetailScreen() {
   const route = useRoute<ScanDetailRouteProp>();
   const navigation = useNavigation();
-  const { scans, initialIndex } = route.params;
+  const { scans: rawScans, initialIndex } = route.params;
+  
+  // Filter out any scans without IDs and deduplicate by ID
+  const scans = useMemo(() => {
+    const seen = new Set<number>();
+    return rawScans.filter((scan: Scan) => {
+      if (!scan.id || seen.has(scan.id)) {
+        return false;
+      }
+      seen.add(scan.id);
+      return true;
+    });
+  }, [rawScans]);
+  
+  // Clamp initial index to valid range
+  const safeInitialIndex = Math.min(Math.max(0, initialIndex), scans.length - 1);
+  
   const scrollViewRef = useRef<ScrollView>(null);
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [currentIndex, setCurrentIndex] = useState(safeInitialIndex);
 
   // Scroll to initial index on mount
   useEffect(() => {
-    if (scrollViewRef.current && initialIndex > 0) {
+    if (scrollViewRef.current && safeInitialIndex > 0) {
       setTimeout(() => {
         scrollViewRef.current?.scrollTo({
-          x: initialIndex * screenWidth,
+          x: safeInitialIndex * screenWidth,
           animated: false,
         });
       }, 100);
     }
-  }, [initialIndex]);
+  }, [safeInitialIndex]);
 
-  const currentScan = scans[currentIndex];
+  const currentScan = scans[currentIndex] || scans[0];
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
@@ -119,8 +135,11 @@ export default function ScanDetailScreen() {
       : null;
     const dateTime = format(new Date(scan.scan_date), 'MMM dd, yyyy HH:mm');
 
+    // Use a combination of ID and index as key to ensure uniqueness
+    const uniqueKey = scan.id ? `scan-${scan.id}-${index}` : `scan-${index}`;
+
     return (
-      <View key={scan.id} style={styles.scanPage}>
+      <View key={uniqueKey} style={styles.scanPage}>
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={styles.imageContainer}>
             {imageUri ? (
