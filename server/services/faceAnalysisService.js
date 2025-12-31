@@ -218,8 +218,9 @@ Return ONLY the JSON object. Ensure values are distinct and logically consistent
             ]
           }
         ],
-        max_completion_tokens: 500, // GPT-5 uses max_completion_tokens instead of max_tokens
+        max_completion_tokens: 4000, // Increased limit to allow for deeper thinking/analysis
         temperature: 0.3, // Lower temperature for consistency (0.3 = more deterministic)
+        reasoning: { effort: 'high' }, // Enable high-effort thinking mode for deeper analysis
         response_format: { type: 'json_object' }
       });
       console.log('OpenAI API call successful');
