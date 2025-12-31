@@ -9,33 +9,46 @@ const __dirname = dirname(__filename);
 const dbPath = join(__dirname, 'looksmaxing.db');
 
 let db;
+let dbReady = false;
 
 export function initDatabase() {
-  db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-      console.error('Error opening database:', err);
-    } else {
-      console.log('Connected to SQLite database');
-      createTables();
-    }
+  return new Promise((resolve, reject) => {
+    db = new sqlite3.Database(dbPath, (err) => {
+      if (err) {
+        console.error('Error opening database:', err);
+        reject(err);
+      } else {
+        console.log('Connected to SQLite database');
+        createTables()
+          .then(() => {
+            dbReady = true;
+            console.log('Database tables initialized');
+            resolve();
+          })
+          .catch(reject);
+      }
+    });
   });
 }
 
-function createTables() {
+async function createTables() {
   const run = promisify(db.run.bind(db));
 
   // Users table
-  run(`
+  await run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
-  `).catch(console.error);
+  `).catch(err => {
+    console.error('Error creating users table:', err);
+    throw err;
+  });
 
   // Scans table
-  run(`
+  await run(`
     CREATE TABLE IF NOT EXISTS scans (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -50,10 +63,20 @@ function createTables() {
       potential_ceiling REAL,
       FOREIGN KEY (user_id) REFERENCES users(id)
     )
-  `).catch(console.error);
+  `).catch(err => {
+    console.error('Error creating scans table:', err);
+    throw err;
+  });
 
   // Create indexes
-  run(`CREATE INDEX IF NOT EXISTS idx_scans_user_date ON scans(user_id, scan_date)`).catch(console.error);
+  await run(`CREATE INDEX IF NOT EXISTS idx_scans_user_date ON scans(user_id, scan_date)`).catch(err => {
+    console.error('Error creating index:', err);
+    throw err;
+  });
+}
+
+export function isDbReady() {
+  return dbReady;
 }
 
 export function getDb() {

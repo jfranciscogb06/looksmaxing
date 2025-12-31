@@ -21,9 +21,6 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' })); // Large limit to handle base64 images (6 images * ~100-150KB each)
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Initialize database
-initDatabase();
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/scans', scanRoutes);
@@ -35,7 +32,16 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Initialize database and start server after DB is ready
+initDatabase()
+  .then(() => {
+    console.log('Database initialization complete');
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
+  });
 
