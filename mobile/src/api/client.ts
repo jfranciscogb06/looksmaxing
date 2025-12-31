@@ -3,10 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Update this to your backend URL
 // For local development, use your computer's IP address
-// For production, use your deployed backend URL
+// For production, use your deployed backend URL (e.g., Railway, Render, etc.)
+// To find your local IP: ifconfig (Mac/Linux) or ipconfig (Windows)
 const API_URL = __DEV__ 
-  ? 'http://192.168.1.39:3001/api' // Your computer's IP address
-  : 'https://your-backend-url.com/api';
+  ? 'http://192.168.1.39:3001/api' // Change to your computer's IP address (both devices must be on same WiFi)
+  : 'https://your-backend-url.com/api'; // Replace with your deployed server URL (e.g., https://your-app.up.railway.app/api)
 
 const client = axios.create({
   baseURL: API_URL,

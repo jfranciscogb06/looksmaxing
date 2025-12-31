@@ -57,16 +57,23 @@ export default function ScanScreen() {
       return null;
     }
     try {
+      // Small delay to ensure camera is ready
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.2,
         base64: true,
       });
       if (!photo || !photo.base64 || photo.base64.length < 100) {
+        console.warn('captureFrame: Photo captured but invalid (too small or missing base64)');
         return null;
       }
       return photo.base64;
     } catch (error: any) {
-      console.error('captureFrame error:', error);
+      // Only log if it's not a common expected error
+      if (!error.message?.includes('camera') && !error.message?.includes('permission')) {
+        console.error('captureFrame error:', error);
+      }
       return null;
     }
   };
@@ -189,7 +196,7 @@ export default function ScanScreen() {
                 if (i + 1 < positions.length) {
                   setCurrentPosition(positions[i + 1].name);
                   playBeep(); // Play vibration when text changes to next position
-                  // Give user time to see the new position and prepare before next capture
+                  // Delay after verification to give user time to see new position and prepare
                   await new Promise(resolve => setTimeout(resolve, 1500));
                 } else {
                   setCurrentPosition('Processing...');
@@ -204,18 +211,21 @@ export default function ScanScreen() {
               if (i + 1 < positions.length) {
                 setCurrentPosition(positions[i + 1].name);
                 playBeep();
+                // Delay after verification to give user time to see new position and prepare
+                await new Promise(resolve => setTimeout(resolve, 1500));
               } else {
                 setCurrentPosition('Processing...');
               }
-              
-              // Small delay after verification before next capture
-              await new Promise(resolve => setTimeout(resolve, 300));
             }
           } else {
+            // Frame capture failed (returned null)
             retryCount++;
             if (retryCount < maxRetries) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              console.warn(`Capture failed for ${position.name}, retrying... (${retryCount}/${maxRetries})`);
+              await new Promise(resolve => setTimeout(resolve, 1500)); // Longer delay on retry
             } else {
+              console.error(`Failed to capture ${position.name} after ${maxRetries} attempts, skipping...`);
+              Alert.alert('Capture Failed', `Could not capture image for ${position.name}. Skipping this position.`);
               frameCaptured = true;
             }
           }

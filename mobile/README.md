@@ -65,3 +65,4 @@ Facial Biometrics Optimization App for mobile devices using Expo.
 - **Camera not working:** Make sure camera permissions are granted
 - **Images not uploading:** Check backend is running and accessible from your device
 
+
