@@ -397,7 +397,7 @@ export default function ScansScreen() {
 
             return (
               <TouchableOpacity
-                key={scan.id}
+                key={`${scan.id}-${scan.scan_date}`}
                 style={[
                   styles.fullScreenCard,
                   { height: height - 100 }, // Screen height minus tab bar (~100px)

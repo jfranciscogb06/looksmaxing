@@ -14,7 +14,7 @@ const client = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 60000, // 60 second timeout for large image uploads
+  timeout: 180000, // 3 minute timeout for GPT-5 analysis with high reasoning effort
   maxContentLength: Infinity, // Allow unlimited content length
   maxBodyLength: Infinity, // Allow unlimited body length
 });
