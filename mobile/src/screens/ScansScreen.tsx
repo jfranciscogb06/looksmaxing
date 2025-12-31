@@ -145,30 +145,42 @@ export default function ScansScreen() {
         
         console.log(`Fetched ${serverScans.length} scans from server, ${localScans.length} from local storage`);
         
-        // Merge local and server scans, prioritizing server data
-        // Use a Map to ensure unique IDs (last one wins)
-        const scanMap = new Map<number, Scan>();
-        
-        // Add local scans first (these will be overwritten by server scans with same ID)
-        localScans.forEach((scan: Scan) => {
-          if (scan.id) {
-            scanMap.set(scan.id, scan);
+        // Parse server scans' image_path
+        serverScans.forEach((scan: Scan) => {
+          if (scan.image_path && typeof scan.image_path === 'string' && scan.image_path.startsWith('[')) {
+            try {
+              scan.image_path = JSON.parse(scan.image_path);
+            } catch (e) {
+              // If parsing fails, keep as is
+              console.warn('Failed to parse image_path for scan', scan.id);
+            }
           }
         });
         
-        // Overwrite with server scans (prioritize server data)
+        // Merge local and server scans
+        // Use a combination of ID + scan_date as unique key to handle database resets
+        // This way, if server resets and reuses IDs, we still keep old local scans
+        const scanMap = new Map<string, Scan>();
+        
+        // Add all local scans first
+        localScans.forEach((scan: Scan) => {
+          if (scan.id && scan.scan_date) {
+            const uniqueKey = `${scan.id}-${scan.scan_date}`;
+            scanMap.set(uniqueKey, scan);
+          }
+        });
+        
+        // Add server scans (will only overwrite if ID + date match exactly)
         serverScans.forEach((scan: Scan) => {
-          if (scan.id) {
-            // Parse image_path if it's a JSON string (for backward compatibility)
-            if (scan.image_path && typeof scan.image_path === 'string' && scan.image_path.startsWith('[')) {
-              try {
-                scan.image_path = JSON.parse(scan.image_path);
-              } catch (e) {
-                // If parsing fails, keep as is
-                console.warn('Failed to parse image_path for scan', scan.id);
-              }
+          if (scan.id && scan.scan_date) {
+            const uniqueKey = `${scan.id}-${scan.scan_date}`;
+            // Prefer server version if it exists, otherwise add it
+            if (!scanMap.has(uniqueKey)) {
+              scanMap.set(uniqueKey, scan);
+            } else {
+              // Same ID + date, prefer server version
+              scanMap.set(uniqueKey, scan);
             }
-            scanMap.set(scan.id, scan);
           }
         });
         
