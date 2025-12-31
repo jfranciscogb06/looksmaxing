@@ -144,16 +144,25 @@ export default function ScansScreen() {
         const serverScans = response.data || [];
         
         // Merge local and server scans, prioritizing server data
-        // Combine and deduplicate by ID
-        const allScans = [...serverScans];
-        localScans.forEach((localScan: Scan) => {
-          if (!serverScans.find((s: Scan) => s.id === localScan.id)) {
-            allScans.push(localScan);
+        // Use a Map to ensure unique IDs (last one wins)
+        const scanMap = new Map<number, Scan>();
+        
+        // Add local scans first
+        localScans.forEach((scan: Scan) => {
+          if (scan.id) {
+            scanMap.set(scan.id, scan);
           }
         });
         
-        // Sort by date (newest first)
-        allScans.sort((a, b) => 
+        // Overwrite with server scans (prioritize server data)
+        serverScans.forEach((scan: Scan) => {
+          if (scan.id) {
+            scanMap.set(scan.id, scan);
+          }
+        });
+        
+        // Convert map to array and sort by date (newest first)
+        const allScans = Array.from(scanMap.values()).sort((a, b) => 
           new Date(b.scan_date).getTime() - new Date(a.scan_date).getTime()
         );
         
@@ -361,9 +370,16 @@ export default function ScansScreen() {
                   { height: height - 100 }, // Screen height minus tab bar (~100px)
                 ]}
                 onPress={() => {
-                  const scanIndex = filteredScans.findIndex(s => s.id === scan.id);
+                  // Ensure unique IDs before navigating (deduplicate by ID)
+                  const uniqueScans = filteredScans.reduce((acc: Scan[], current: Scan) => {
+                    if (!acc.find(s => s.id === current.id)) {
+                      acc.push(current);
+                    }
+                    return acc;
+                  }, []);
+                  const scanIndex = uniqueScans.findIndex(s => s.id === scan.id);
                   navigation.navigate('ScanDetail', { 
-                    scans: filteredScans, 
+                    scans: uniqueScans, 
                     initialIndex: scanIndex >= 0 ? scanIndex : 0 
                   });
                 }}
