@@ -143,11 +143,13 @@ export default function ScansScreen() {
         const response = await client.get('/scans');
         const serverScans = response.data || [];
         
+        console.log(`Fetched ${serverScans.length} scans from server, ${localScans.length} from local storage`);
+        
         // Merge local and server scans, prioritizing server data
         // Use a Map to ensure unique IDs (last one wins)
         const scanMap = new Map<number, Scan>();
         
-        // Add local scans first
+        // Add local scans first (these will be overwritten by server scans with same ID)
         localScans.forEach((scan: Scan) => {
           if (scan.id) {
             scanMap.set(scan.id, scan);
@@ -175,6 +177,7 @@ export default function ScansScreen() {
           new Date(b.scan_date).getTime() - new Date(a.scan_date).getTime()
         );
         
+        console.log(`Total scans after merge: ${allScans.length}`);
         setScans(allScans);
         // Save merged scans locally
         await saveScansLocally(allScans);
