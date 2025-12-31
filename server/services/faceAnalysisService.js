@@ -84,11 +84,12 @@ export async function analyzeFacialStructure(images) {
     const prompt = `You are a facial biometric analyst. You have been provided with ${images.length} image(s) showing the face from different angles:
 ${imageDescriptions}
 
-CRITICAL INSTRUCTIONS:
+CRITICAL INSTRUCTIONS FOR CONSISTENCY:
 1. You must analyze ALL provided images to assess each metric accurately
 2. Different metrics require different angles for accurate assessment
 3. You must assign DIFFERENT values to each metric - they measure distinct aspects
 4. Use the most relevant angle(s) for each specific metric
+5. **CRITICAL FOR CONSISTENCY**: Use the scoring anchors below as EXACT reference points. Similar-looking faces should receive similar scores. When assessing visual features, match them precisely to the anchor descriptions and assign scores accordingly. Be consistent - if you see the same visual characteristics, assign the same score.
 
 Return ONLY a valid JSON object with these exact keys:
 {
@@ -182,7 +183,7 @@ METRIC RELATIONSHIPS (these should correlate logically):
 - definition_score is INVERSE of water_retention/inflammation (when water is high, definition is low)
 - facial_fat_layer is independent but often correlates with definition
 
-ANALYSIS PROCESS:
+ANALYSIS PROCESS (FOLLOW STRICTLY FOR CONSISTENCY):
 1. Review ALL images to understand the face from multiple angles
 2. For LYMPH CONGESTION: Pay special attention to LEFT PROFILE, RIGHT PROFILE, and UPWARD angle images
 3. For each metric, use the most relevant angle(s):
@@ -191,12 +192,12 @@ ANALYSIS PROCESS:
    - Lymph congestion: LEFT PROFILE + RIGHT PROFILE + UP ANGLE (critical!)
    - Facial fat: Center + Side profiles
    - Definition: ALL ANGLES (comprehensive view)
-4. Assign base scores using anchors above based on face type assessment
-5. Refine each metric based on specific visual features from relevant angles
-6. Ensure logical relationships between metrics
+4. **MATCH VISUAL FEATURES TO ANCHORS**: Compare what you see in the images to the anchor descriptions. Find the anchor that best matches the visual characteristics you observe. Assign scores that align closely with those anchor points.
+5. **CONSISTENCY CHECK**: If the face looks similar to a previous analysis (similar jaw definition, similar under-eye bags, similar cheek fullness), assign similar scores. Consistency across similar faces is more important than precision to a specific number.
+6. Ensure logical relationships between metrics (as described in METRIC RELATIONSHIPS)
 7. Final check: Metrics must be DIFFERENT (spread of at least 10 points between min and max)
 
-REMEMBER: You have multiple angles for a reason - use them! Especially for lymph congestion, the side and up profiles are essential.
+REMEMBER: You have multiple angles for a reason - use them! Especially for lymph congestion, the side and up profiles are essential. MOST IMPORTANTLY: Be consistent - similar visual features should receive similar scores.
 
 Return ONLY the JSON object. Ensure values are distinct and logically consistent.`;
 
@@ -208,7 +209,7 @@ Return ONLY the JSON object. Ensure values are distinct and logically consistent
         messages: [
           {
             role: 'system',
-            content: 'You are a consistent facial biometric analyst. Assign precise numeric scores (0-100) based on visual assessment. Each metric must have a different value. Use the provided scoring anchors as reference points for consistency across analyses.'
+            content: 'You are a consistent facial biometric analyst. Your primary goal is CONSISTENCY - similar-looking faces must receive similar scores. Match visual features to the provided scoring anchors exactly. Assign precise numeric scores (0-100) based on visual assessment, using the anchors as strict reference points. Each metric must have a different value. When in doubt, choose the anchor point that best matches what you see.'
           },
           {
             role: 'user',
@@ -218,8 +219,8 @@ Return ONLY the JSON object. Ensure values are distinct and logically consistent
             ]
           }
         ],
-        max_completion_tokens: 4000, // Increased limit to allow for deeper thinking/analysis
-        reasoning_effort: 'high', // Enable high-effort reasoning for deeper analysis
+        max_completion_tokens: 2000, // Balanced limit for thorough but faster analysis
+        reasoning_effort: 'medium', // Medium reasoning effort for balance between speed and accuracy
         response_format: { type: 'json_object' }
         // Note: GPT-5 only supports default temperature (1), so we don't set it
       });
