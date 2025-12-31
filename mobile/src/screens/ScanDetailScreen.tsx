@@ -144,70 +144,81 @@ export default function ScanDetailScreen() {
         <View style={styles.placeholder} />
       </View>
 
-      {images.length > 1 ? (
-        <>
-          <ScrollView
-            ref={scrollViewRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-            style={styles.carousel}
-          >
-            {images.map((imageBase64, index) => renderImage(imageBase64, index))}
-          </ScrollView>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={true}>
+        {images.length > 1 ? (
+          <>
+            <ScrollView
+              ref={scrollViewRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+              style={styles.carousel}
+            >
+              {images.map((imageBase64, index) => renderImage(imageBase64, index))}
+            </ScrollView>
 
-          {/* Pagination dots */}
-          <View style={styles.pagination}>
-            {images.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.paginationDot,
-                  index === currentIndex && styles.paginationDotActive,
-                ]}
-              />
-            ))}
-          </View>
-
-          {/* Fixed metrics below carousel */}
-          <ScrollView style={styles.metricsScrollView} showsVerticalScrollIndicator={false}>
-            <View style={styles.metricsSection}>
-              <Text style={styles.sectionTitle}>Metrics</Text>
-              <View style={styles.metricsGrid}>
-                <MetricCard
-                  label="Water Retention"
-                  value={scan.water_retention}
-                  unit="%"
-                  trend="down"
+            {/* Pagination dots */}
+            <View style={styles.pagination}>
+              {images.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.paginationDot,
+                    index === currentIndex && styles.paginationDotActive,
+                  ]}
                 />
-                <MetricCard
-                  label="Puffiness Index"
-                  value={scan.inflammation_index}
-                  trend="down"
-                />
-                <MetricCard
-                  label="Lymph Congestion"
-                  value={scan.lymph_congestion_score}
-                  trend="down"
-                />
-                <MetricCard
-                  label="Definition Score"
-                  value={scan.definition_score}
-                  trend="up"
-                />
-                <MetricCard
-                  label="Facial Fat Layer"
-                  value={scan.facial_fat_layer}
-                  unit="%"
-                  trend="down"
-                />
-              </View>
+              ))}
             </View>
-          </ScrollView>
-        </>
-      ) : images.length === 1 ? (
+          </>
+        ) : images.length === 1 ? (
+          <View style={styles.imageContainer}>
+            <Image 
+              source={{ uri: `data:image/jpeg;base64,${images[0]}` }} 
+              style={[styles.detailImage, styles.mirroredImage]} 
+              resizeMode="cover" 
+            />
+            <Text style={styles.dateText}>{format(new Date(scan.scan_date), 'MMM dd, yyyy HH:mm')}</Text>
+          </View>
+        ) : null}
+
+        {/* Metrics section - scrollable with everything else */}
+        <View style={styles.metricsSection}>
+          <Text style={styles.sectionTitle}>Metrics</Text>
+          <View style={styles.metricsGrid}>
+            <MetricCard
+              label="Water Retention"
+              value={scan.water_retention}
+              unit="%"
+              trend="down"
+            />
+            <MetricCard
+              label="Puffiness Index"
+              value={scan.inflammation_index}
+              trend="down"
+            />
+            <MetricCard
+              label="Lymph Congestion"
+              value={scan.lymph_congestion_score}
+              trend="down"
+            />
+            <MetricCard
+              label="Definition Score"
+              value={scan.definition_score}
+              trend="up"
+            />
+            <MetricCard
+              label="Facial Fat Layer"
+              value={scan.facial_fat_layer}
+              unit="%"
+              trend="down"
+            />
+          </View>
+        </View>
+      </ScrollView>
+
+      {images.length === 0 ? (
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={styles.imageContainer}>
             <Image 
@@ -291,22 +302,19 @@ const styles = StyleSheet.create({
     width: 60,
   },
   carousel: {
-    height: Dimensions.get('window').height * 0.65, // Use 65% of screen height for carousel
+    height: Dimensions.get('window').height * 0.7, // Use 70% of screen height for carousel
   },
   scanPage: {
     width: screenWidth,
-    height: Dimensions.get('window').height * 0.65,
+    height: Dimensions.get('window').height * 0.7,
   },
   imagePage: {
     width: screenWidth,
-    height: Dimensions.get('window').height * 0.65,
+    height: Dimensions.get('window').height * 0.7,
     justifyContent: 'center',
   },
   scrollView: {
     flex: 1,
-  },
-  metricsScrollView: {
-    maxHeight: Dimensions.get('window').height * 0.3, // Limit metrics to 30% of screen
   },
   imageContainer: {
     margin: 10,
