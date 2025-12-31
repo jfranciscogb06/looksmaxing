@@ -370,18 +370,7 @@ export default function ScansScreen() {
                   { height: height - 100 }, // Screen height minus tab bar (~100px)
                 ]}
                 onPress={() => {
-                  // Ensure unique IDs before navigating (deduplicate by ID)
-                  const uniqueScans = filteredScans.reduce((acc: Scan[], current: Scan) => {
-                    if (!acc.find(s => s.id === current.id)) {
-                      acc.push(current);
-                    }
-                    return acc;
-                  }, []);
-                  const scanIndex = uniqueScans.findIndex(s => s.id === scan.id);
-                  navigation.navigate('ScanDetail', { 
-                    scans: uniqueScans, 
-                    initialIndex: scanIndex >= 0 ? scanIndex : 0 
-                  });
+                  navigation.navigate('ScanDetail', { scan });
                 }}
                 activeOpacity={0.9}
               >

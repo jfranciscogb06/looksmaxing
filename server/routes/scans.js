@@ -58,8 +58,8 @@ router.post('/', async (req, res) => {
         }
       }
 
-      // Store center image (first image) and images count
-      const centerImage = images[0] || null; // Store first/center image
+      // Store all images as JSON array in image_path field
+      const imagesJson = JSON.stringify(images); // Store all images as JSON array
       const result = await run(
         `INSERT INTO scans (
           user_id, image_path, landmarks, water_retention, inflammation_index,
@@ -67,7 +67,7 @@ router.post('/', async (req, res) => {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           req.userId,
-          centerImage, // Store center image as base64 in image_path field
+          imagesJson, // Store all images as JSON array
           JSON.stringify({ images: images.length }), // Store count of images
           metrics.water_retention,
           metrics.inflammation_index,
@@ -92,6 +92,15 @@ router.post('/', async (req, res) => {
         } catch (parseError) {
           console.error('Error parsing landmarks JSON:', parseError);
           scan.landmarks = null;
+        }
+      }
+      
+      // Parse image_path if it's a JSON array, otherwise keep as is (backward compatibility)
+      if (scan.image_path && scan.image_path.startsWith('[')) {
+        try {
+          scan.image_path = JSON.parse(scan.image_path);
+        } catch (e) {
+          // If parsing fails, keep as is (might be old format single image)
         }
       }
 
@@ -122,12 +131,20 @@ router.get('/', async (req, res) => {
       [req.userId]
     );
 
-    // Parse landmarks JSON for each scan
-    scans.forEach(scan => {
-      if (scan.landmarks) {
-        scan.landmarks = JSON.parse(scan.landmarks);
-      }
-    });
+      // Parse landmarks JSON and image_path (could be single image string or JSON array)
+      scans.forEach(scan => {
+        if (scan.landmarks) {
+          scan.landmarks = JSON.parse(scan.landmarks);
+        }
+        // Parse image_path if it's a JSON array, otherwise keep as is (backward compatibility)
+        if (scan.image_path && scan.image_path.startsWith('[')) {
+          try {
+            scan.image_path = JSON.parse(scan.image_path);
+          } catch (e) {
+            // If parsing fails, keep as is (might be old format single image)
+          }
+        }
+      });
 
     res.json(scans);
   } catch (error) {
@@ -150,6 +167,15 @@ router.get('/:id', async (req, res) => {
 
     if (scan.landmarks) {
       scan.landmarks = JSON.parse(scan.landmarks);
+    }
+    
+    // Parse image_path if it's a JSON array, otherwise keep as is (backward compatibility)
+    if (scan.image_path && scan.image_path.startsWith('[')) {
+      try {
+        scan.image_path = JSON.parse(scan.image_path);
+      } catch (e) {
+        // If parsing fails, keep as is (might be old format single image)
+      }
     }
 
     res.json(scan);

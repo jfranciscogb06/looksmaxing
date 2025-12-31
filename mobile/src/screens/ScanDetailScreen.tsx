@@ -18,7 +18,7 @@ const { width: screenWidth } = Dimensions.get('window');
 interface Scan {
   id: number;
   scan_date: string;
-  image_path?: string | null;
+  image_path?: string | string[] | null; // Can be single image (string) or array of images
   water_retention: number;
   inflammation_index: number;
   lymph_congestion_score: number;
@@ -27,7 +27,7 @@ interface Scan {
 }
 
 type RootStackParamList = {
-  ScanDetail: { scans: Scan[]; initialIndex: number };
+  ScanDetail: { scan: Scan };
 };
 
 type ScanDetailRouteProp = RouteProp<RootStackParamList, 'ScanDetail'>;
@@ -87,73 +87,44 @@ function MetricCard({
 export default function ScanDetailScreen() {
   const route = useRoute<ScanDetailRouteProp>();
   const navigation = useNavigation();
-  const { scans: rawScans, initialIndex } = route.params;
+  const { scan } = route.params;
   
-  // Filter out any scans without IDs and deduplicate by ID
-  const scans = useMemo(() => {
-    const seen = new Set<number>();
-    return rawScans.filter((scan: Scan) => {
-      if (!scan.id || seen.has(scan.id)) {
-        return false;
-      }
-      seen.add(scan.id);
-      return true;
-    });
-  }, [rawScans]);
-  
-  // Clamp initial index to valid range
-  const safeInitialIndex = Math.min(Math.max(0, initialIndex), scans.length - 1);
+  // Get images array - handle both old format (single string) and new format (array)
+  const images = useMemo(() => {
+    if (!scan.image_path) return [];
+    if (Array.isArray(scan.image_path)) {
+      return scan.image_path;
+    }
+    // Old format: single image string, convert to array
+    return [scan.image_path];
+  }, [scan.image_path]);
   
   const scrollViewRef = useRef<ScrollView>(null);
-  const [currentIndex, setCurrentIndex] = useState(safeInitialIndex);
-
-  // Scroll to initial index on mount
-  useEffect(() => {
-    if (scrollViewRef.current && safeInitialIndex > 0) {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollTo({
-          x: safeInitialIndex * screenWidth,
-          animated: false,
-        });
-      }, 100);
-    }
-  }, [safeInitialIndex]);
-
-  const currentScan = scans[currentIndex] || scans[0];
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(contentOffsetX / screenWidth);
-    if (index !== currentIndex && index >= 0 && index < scans.length) {
+    if (index !== currentIndex && index >= 0 && index < images.length) {
       setCurrentIndex(index);
     }
   };
 
-  const renderScanDetail = (scan: Scan, index: number) => {
-    const imageUri = scan.image_path
-      ? `data:image/jpeg;base64,${scan.image_path}`
-      : null;
-    const dateTime = format(new Date(scan.scan_date), 'MMM dd, yyyy HH:mm');
-
-    // Use a combination of ID and index as key to ensure uniqueness
-    const uniqueKey = scan.id ? `scan-${scan.id}-${index}` : `scan-${index}`;
+  const renderImage = (imageBase64: string, index: number) => {
+    const imageUri = `data:image/jpeg;base64,${imageBase64}`;
+    const positionNames = ['Center', 'Look Left', 'Look Right', 'Look Up', 'Look Down', 'Center Again'];
+    const positionName = positionNames[index] || `Angle ${index + 1}`;
 
     return (
-      <View key={uniqueKey} style={styles.scanPage}>
+      <View key={`image-${index}`} style={styles.scanPage}>
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           <View style={styles.imageContainer}>
-            {imageUri ? (
-              <Image 
-                source={{ uri: imageUri }} 
-                style={[styles.detailImage, styles.mirroredImage]} 
-                resizeMode="cover" 
-              />
-            ) : (
-              <View style={[styles.detailImage, styles.placeholderImage]}>
-                <Text style={styles.placeholderText}>No Image</Text>
-              </View>
-            )}
-            <Text style={styles.dateText}>{dateTime}</Text>
+            <Image 
+              source={{ uri: imageUri }} 
+              style={[styles.detailImage, styles.mirroredImage]} 
+              resizeMode="cover" 
+            />
+            <Text style={styles.dateText}>{format(new Date(scan.scan_date), 'MMM dd, yyyy HH:mm')} - {positionName}</Text>
           </View>
 
           <View style={styles.metricsSection}>
@@ -203,35 +174,87 @@ export default function ScanDetailScreen() {
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
-          Scan {currentIndex + 1} of {scans.length}
+          {images.length > 1 ? `Angle ${currentIndex + 1} of ${images.length}` : 'Scan Details'}
         </Text>
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        style={styles.carousel}
-      >
-        {scans.map((scan, index) => renderScanDetail(scan, index))}
-      </ScrollView>
+      {images.length > 1 ? (
+        <>
+          <ScrollView
+            ref={scrollViewRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+            style={styles.carousel}
+          >
+            {images.map((imageBase64, index) => renderImage(imageBase64, index))}
+          </ScrollView>
 
-      {/* Pagination dots */}
-      <View style={styles.pagination}>
-        {scans.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.paginationDot,
-              index === currentIndex && styles.paginationDotActive,
-            ]}
-          />
-        ))}
-      </View>
+          {/* Pagination dots */}
+          <View style={styles.pagination}>
+            {images.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.paginationDot,
+                  index === currentIndex && styles.paginationDotActive,
+                ]}
+              />
+            ))}
+          </View>
+        </>
+      ) : images.length === 1 ? (
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <View style={styles.imageContainer}>
+            <Image 
+              source={{ uri: `data:image/jpeg;base64,${images[0]}` }} 
+              style={[styles.detailImage, styles.mirroredImage]} 
+              resizeMode="cover" 
+            />
+            <Text style={styles.dateText}>{format(new Date(scan.scan_date), 'MMM dd, yyyy HH:mm')}</Text>
+          </View>
+
+          <View style={styles.metricsSection}>
+            <Text style={styles.sectionTitle}>Metrics</Text>
+            <View style={styles.metricsGrid}>
+              <MetricCard
+                label="Water Retention"
+                value={scan.water_retention}
+                unit="%"
+                trend="down"
+              />
+              <MetricCard
+                label="Puffiness Index"
+                value={scan.inflammation_index}
+                trend="down"
+              />
+              <MetricCard
+                label="Lymph Congestion"
+                value={scan.lymph_congestion_score}
+                trend="down"
+              />
+              <MetricCard
+                label="Definition Score"
+                value={scan.definition_score}
+                trend="up"
+              />
+              <MetricCard
+                label="Facial Fat Layer"
+                value={scan.facial_fat_layer}
+                unit="%"
+                trend="down"
+              />
+            </View>
+          </View>
+        </ScrollView>
+      ) : (
+        <View style={styles.centerContainer}>
+          <Text style={styles.emptyText}>No images available</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -360,6 +383,15 @@ const styles = StyleSheet.create({
   metricStatus: {
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#999',
+    fontSize: 16,
   },
 });
 
