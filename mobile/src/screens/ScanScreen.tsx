@@ -33,11 +33,9 @@ export default function ScanScreen() {
 
   const positions: Position[] = [
     { name: 'Center', pose: 'center', progress: 0 },
-    { name: 'Look Left', pose: 'left', progress: 20 },
-    { name: 'Look Right', pose: 'right', progress: 40 },
-    { name: 'Look Up', pose: 'up', progress: 60 },
-    { name: 'Look Down', pose: 'down', progress: 80 },
-    { name: 'Center Again', pose: 'center', progress: 100 },
+    { name: 'Look Left', pose: 'left', progress: 33 },
+    { name: 'Look Right', pose: 'right', progress: 67 },
+    { name: 'Look Up', pose: 'up', progress: 100 },
   ];
 
   // Request camera permission on mount

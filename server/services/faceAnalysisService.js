@@ -69,9 +69,7 @@ export async function analyzeFacialStructure(images) {
       'center (forward-facing)',
       'looking left (left profile)',
       'looking right (right profile)', 
-      'looking up (upward angle)',
-      'looking down (downward angle)',
-      'center again (forward-facing)'
+      'looking up (upward angle)'
     ];
     
     const imageDescriptions = images.map((img, idx) => {
@@ -168,7 +166,6 @@ STANDARDIZED SCORING GUIDELINES - Use these visual anchors:
    - CENTER: Overall structure clarity, cheekbone prominence, face shape definition
    - SIDE PROFILES (left/right): Jaw sharpness, bone structure visibility, profile definition
    - UP ANGLE: Jaw line clarity, neck definition, lower face structure
-   - DOWN ANGLE: Overall structure maintenance
    
    SCORING ANCHORS:
    - 80%: Exceptional definition from all angles, razor-sharp jaw in profiles, prominent cheekbones, clear structure
@@ -191,7 +188,7 @@ ANALYSIS PROCESS (FOLLOW STRICTLY FOR CONSISTENCY):
    - Inflammation: Center + Side profiles + Up
    - Lymph congestion: LEFT PROFILE + RIGHT PROFILE + UP ANGLE (critical!)
    - Facial fat: Center + Side profiles
-   - Definition: ALL ANGLES (comprehensive view)
+   - Definition: Center + Side profiles + Up (comprehensive view)
 4. **MATCH VISUAL FEATURES TO ANCHORS**: Compare what you see in the images to the anchor descriptions. Find the anchor that best matches the visual characteristics you observe. Assign scores that align closely with those anchor points.
 5. **CONSISTENCY CHECK**: If the face looks similar to a previous analysis (similar jaw definition, similar under-eye bags, similar cheek fullness), assign similar scores. Consistency across similar faces is more important than precision to a specific number.
 6. Ensure logical relationships between metrics (as described in METRIC RELATIONSHIPS)
