@@ -5,9 +5,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // For local development, use your computer's IP address
 // For production, use your deployed backend URL (e.g., Railway, Render, etc.)
 // To find your local IP: ifconfig (Mac/Linux) or ipconfig (Windows)
-const API_URL = __DEV__ 
-  ? 'http://192.168.1.39:3001/api' // Change to your computer's IP address (both devices must be on same WiFi)
-  : 'https://looksmaxing-api.onrender.com/api'; // Render production URL
+// Using Render production URL since we're on different networks
+// For local testing, change to your local IP: http://YOUR_IP:3001/api
+const API_URL = 'https://looksmaxing-api.onrender.com/api';
 
 const client = axios.create({
   baseURL: API_URL,
@@ -31,6 +31,23 @@ client.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+// Handle 401 errors - clear invalid token
+client.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Token is invalid, clear it
+      try {
+        await AsyncStorage.removeItem('token');
+        console.log('Token cleared due to 401 error - please login again');
+      } catch (e) {
+        console.error('Error clearing token:', e);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default client;
 

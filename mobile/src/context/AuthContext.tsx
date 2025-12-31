@@ -22,11 +22,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loadToken = async () => {
     try {
       const storedToken = await AsyncStorage.getItem('token');
-      if (storedToken) {
-        setToken(storedToken);
-      }
+      setToken(storedToken); // Set to null if token doesn't exist
     } catch (error) {
       console.error('Error loading token:', error);
+      setToken(null);
     }
   };
 
