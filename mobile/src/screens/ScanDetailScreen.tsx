@@ -291,32 +291,34 @@ const styles = StyleSheet.create({
     width: 60,
   },
   carousel: {
-    flex: 1,
+    height: Dimensions.get('window').height * 0.65, // Use 65% of screen height for carousel
   },
   scanPage: {
     width: screenWidth,
-    flex: 1,
+    height: Dimensions.get('window').height * 0.65,
   },
   imagePage: {
     width: screenWidth,
-    flex: 1,
+    height: Dimensions.get('window').height * 0.65,
+    justifyContent: 'center',
   },
   scrollView: {
     flex: 1,
   },
   metricsScrollView: {
-    flex: 1,
+    maxHeight: Dimensions.get('window').height * 0.3, // Limit metrics to 30% of screen
   },
   imageContainer: {
-    margin: 20,
+    margin: 10,
     marginBottom: 10,
     borderRadius: 10,
     overflow: 'hidden',
     backgroundColor: '#2a2a2a',
+    flex: 1,
   },
   detailImage: {
     width: '100%',
-    aspectRatio: 0.75,
+    height: '100%',
   },
   mirroredImage: {
     transform: [{ scaleX: -1 }],
