@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // To find your local IP: ifconfig (Mac/Linux) or ipconfig (Windows)
 const API_URL = __DEV__ 
   ? 'http://192.168.1.39:3001/api' // Change to your computer's IP address (both devices must be on same WiFi)
-  : 'https://your-backend-url.com/api'; // Replace with your deployed server URL (e.g., https://your-app.up.railway.app/api)
+  : 'https://looksmaxing-api.onrender.com/api'; // Render production URL
 
 const client = axios.create({
   baseURL: API_URL,
