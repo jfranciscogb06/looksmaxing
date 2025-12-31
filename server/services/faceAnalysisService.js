@@ -236,13 +236,27 @@ Return ONLY the JSON object. Ensure values are distinct and logically consistent
       throw new Error(`OpenAI API error: ${apiError.message}`);
     }
 
-    const content = response.choices[0]?.message?.content;
+    // GPT-5 with reasoning might return content differently
+    const message = response.choices[0]?.message;
+    let content = message?.content;
+    
+    // If no content in message, check for reasoning content or other fields
+    if (!content && message) {
+      console.warn('No content in message, checking response structure:', {
+        hasMessage: !!message,
+        messageKeys: Object.keys(message || {}),
+        responseKeys: Object.keys(response || {}),
+        choicesLength: response.choices?.length
+      });
+    }
+    
     if (!content) {
-      console.error('No response from OpenAI');
+      console.error('No response content from OpenAI');
+      console.error('Full response structure:', JSON.stringify(response, null, 2));
       return getDefaultMetrics();
     }
 
-    console.log('OpenAI Vision response:', content);
+    console.log('OpenAI Vision response:', content.substring(0, 500)); // Log first 500 chars
 
     // Parse JSON response
     let metrics;
