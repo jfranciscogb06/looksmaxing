@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import client from '../api/client';
 import { format } from 'date-fns';
 
