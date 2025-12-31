@@ -218,51 +218,7 @@ export default function ScanDetailScreen() {
         </View>
       </ScrollView>
 
-      {images.length === 0 ? (
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          <View style={styles.imageContainer}>
-            <Image 
-              source={{ uri: `data:image/jpeg;base64,${images[0]}` }} 
-              style={[styles.detailImage, styles.mirroredImage]} 
-              resizeMode="cover" 
-            />
-            <Text style={styles.dateText}>{format(new Date(scan.scan_date), 'MMM dd, yyyy HH:mm')}</Text>
-          </View>
-
-          <View style={styles.metricsSection}>
-            <Text style={styles.sectionTitle}>Metrics</Text>
-            <View style={styles.metricsGrid}>
-              <MetricCard
-                label="Water Retention"
-                value={scan.water_retention}
-                unit="%"
-                trend="down"
-              />
-              <MetricCard
-                label="Puffiness Index"
-                value={scan.inflammation_index}
-                trend="down"
-              />
-              <MetricCard
-                label="Lymph Congestion"
-                value={scan.lymph_congestion_score}
-                trend="down"
-              />
-              <MetricCard
-                label="Definition Score"
-                value={scan.definition_score}
-                trend="up"
-              />
-              <MetricCard
-                label="Facial Fat Layer"
-                value={scan.facial_fat_layer}
-                unit="%"
-                trend="down"
-              />
-            </View>
-          </View>
-        </ScrollView>
-      ) : (
+      {images.length === 0 && (
         <View style={styles.centerContainer}>
           <Text style={styles.emptyText}>No images available</Text>
         </View>
