@@ -220,7 +220,7 @@ Return ONLY the JSON object. Ensure values are distinct and logically consistent
           }
         ],
         max_completion_tokens: 2000, // Balanced limit for thorough but faster analysis
-        // Temporarily removed reasoning_effort to debug empty response issue
+        reasoning_effort: 'medium', // Medium reasoning effort for balance between speed and accuracy
         response_format: { type: 'json_object' }
         // Note: GPT-5 only supports default temperature (1), so we don't set it
       });
@@ -236,18 +236,32 @@ Return ONLY the JSON object. Ensure values are distinct and logically consistent
       throw new Error(`OpenAI API error: ${apiError.message}`);
     }
 
-    // GPT-5 with reasoning might return content differently
+    // GPT-5 with reasoning might return content as an array or in different structure
     const message = response.choices[0]?.message;
     let content = message?.content;
     
-    // If no content in message, check for reasoning content or other fields
+    // Handle content that might be an array (reasoning models sometimes return array)
+    if (Array.isArray(content)) {
+      console.log('Content is an array, extracting text:', content);
+      // Find the text content (usually the last item or item with type 'text')
+      const textContent = content.find(item => item.type === 'text') || content[content.length - 1];
+      content = typeof textContent === 'string' ? textContent : textContent?.text || textContent?.content || '';
+    }
+    
+    // If still no content, check for reasoning content or other fields
     if (!content && message) {
       console.warn('No content in message, checking response structure:', {
         hasMessage: !!message,
         messageKeys: Object.keys(message || {}),
         responseKeys: Object.keys(response || {}),
-        choicesLength: response.choices?.length
+        choicesLength: response.choices?.length,
+        messageContent: message?.content,
+        messageContentType: typeof message?.content
       });
+      
+      // Try alternative field names
+      if (message.text) content = message.text;
+      if (message.output) content = message.output;
     }
     
     if (!content) {
@@ -256,7 +270,7 @@ Return ONLY the JSON object. Ensure values are distinct and logically consistent
       return getDefaultMetrics();
     }
 
-    console.log('OpenAI Vision response:', content.substring(0, 500)); // Log first 500 chars
+    console.log('OpenAI Vision response:', typeof content === 'string' ? content.substring(0, 500) : content); // Log first 500 chars
 
     // Parse JSON response
     let metrics;
