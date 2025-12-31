@@ -204,7 +204,7 @@ Return ONLY the JSON object. Ensure values are distinct and logically consistent
     try {
       console.log('Calling OpenAI Vision API with', imageContents.length, 'image(s)...');
       response = await client.chat.completions.create({
-        model: 'gpt-4o', // GPT-4o supports vision
+        model: 'gpt-5', // GPT-5 for enhanced facial analysis
         messages: [
           {
             role: 'system',
