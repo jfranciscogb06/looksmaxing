@@ -185,6 +185,20 @@ STANDARDIZED SCORING GUIDELINES - Use these visual anchors:
    - 80%: Very full, bones not visible from profiles, round face shape
 
 5. DEFINITION SCORE (0-100, higher is better):
+   WHAT DEFINITION LOOKS LIKE: Definition measures how SHARP, ANGULAR, and STRUCTURED the facial features appear. 
+   High definition = chiseled, sculpted appearance with clear bone structure. Low definition = soft, rounded, undefined appearance.
+   
+   HOW TO RECOGNIZE DEFINITION:
+   - Jaw sharpness (best seen from side profiles): Razor-sharp, chiseled jawline with clear, angular edges = high definition. Soft, rounded, blurred jawline with no sharp edges = low definition. Compare jawline sharpness from side angles - should look crisp and angular.
+   - Cheekbone prominence (visible from center and side): Prominent, clearly visible cheekbones that create shadows and structure = high definition. Flat, barely visible cheekbones with minimal shadow/structure = low definition. Look for cheekbone ridge creating definition and shadows on the face.
+   - Overall structure clarity (from center view): Clear facial structure with visible bone definition, angular features = high definition. Soft, rounded features with minimal bone structure visible = low definition. Face should look structured and angular rather than soft and round.
+   - Neck definition (from up angle and side profiles): Defined neck line, clear separation between jaw and neck = high definition. Soft, undefined neck area with blurred transitions = low definition. Look for clean lines and clear anatomical boundaries.
+   - Profile definition (from side angles): Sharp, angular profile with clear bone structure visible = high definition. Soft, rounded profile with minimal structural definition = low definition. Side profile should show clear bone structure, not just soft curves.
+   
+   Key concept: Definition is about sharpness, angularity, and bone structure visibility. It's the opposite of softness/puffiness - a highly defined face looks chiseled and structured, like it's "sculpted" rather than "soft/bloated".
+   
+   Compare to low definition: Soft, rounded features with blurred jaw, no visible bone structure. Flag when features appear sharp, angular, and structured versus soft, rounded, and undefined.
+   
    Use ALL ANGLES to assess facial definition comprehensively.
    Evaluate from:
    - CENTER: Overall structure clarity, cheekbone prominence, face shape definition
