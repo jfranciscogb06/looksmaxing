@@ -106,6 +106,15 @@ STANDARDIZED SCORING GUIDELINES - Use these visual anchors:
    A face with high water retention looks SWOLLEN, BLOATED, or PUFFY - like it's holding extra fluid. 
    A face with low water retention looks LEAN, SHARP, and DEFINED - with clear bone structure visible.
    
+   HOW TO RECOGNIZE PUFFINESS:
+   - Under-eye bags: Swollen, puffy bags under the eyes that are more prominent than normal, can make eyes look smaller or recessed
+   - Cheek fullness: Cheeks appear full, rounded, or swollen - less angular/defined than normal, can look "chipmunk-like" or overly full
+   - Jaw softness: Jawline appears soft or blurred, less sharp/defined, rounder rather than angular. From side profile, jaw appears less chiseled
+   - Neck pooling: "Double chin" appearance or pooling under the jaw, soft undefined area, less defined neckline
+   - Overall: Face looks rounder/fuller than usual, less bone structure visible (cheekbones, jaw), features appear softer and less angular
+   
+   Compare to what a lean, defined face looks like - sharp jaw, visible cheekbones, minimal under-eye softness. Flag when features appear softer, rounder, or more swollen than this baseline.
+   
    Use CENTER (forward-facing) images primarily, but also check SIDE PROFILES and UPWARD angle.
    Assess overall facial puffiness from:
    - Under-eye bags (best seen in center and up angles)
