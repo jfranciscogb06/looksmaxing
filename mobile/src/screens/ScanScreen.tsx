@@ -60,7 +60,7 @@ export default function ScanScreen() {
       await new Promise(resolve => setTimeout(resolve, 200));
       
       const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.2,
+        quality: 0.1, // Reduced from 0.2 to 0.1 for faster AI processing - 10% quality is sufficient for facial analysis
         base64: true,
       });
       if (!photo || !photo.base64 || photo.base64.length < 100) {
