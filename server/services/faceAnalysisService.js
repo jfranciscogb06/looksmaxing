@@ -102,6 +102,10 @@ Return ONLY a valid JSON object with these exact keys:
 STANDARDIZED SCORING GUIDELINES - Use these visual anchors:
 
 1. WATER RETENTION % (0-100, lower is better):
+   WHAT WATER RETENTION LOOKS LIKE: Water retention manifests as facial PUFFINESS, SOFTNESS, and LACK OF DEFINITION. 
+   A face with high water retention looks SWOLLEN, BLOATED, or PUFFY - like it's holding extra fluid. 
+   A face with low water retention looks LEAN, SHARP, and DEFINED - with clear bone structure visible.
+   
    Use CENTER (forward-facing) images primarily, but also check SIDE PROFILES and UPWARD angle.
    Assess overall facial puffiness from:
    - Under-eye bags (best seen in center and up angles)
