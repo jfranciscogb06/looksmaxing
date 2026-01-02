@@ -146,6 +146,17 @@ STANDARDIZED SCORING GUIDELINES - Use these visual anchors:
 
 3. LYMPH CONGESTION SCORE (0-100, lower is better):
    CRITICAL: Use the LEFT PROFILE (looking left), RIGHT PROFILE (looking right), and UPWARD ANGLE (looking up) images to assess this.
+   
+   HOW TO RECOGNIZE LYMPH CONGESTION:
+   - Jaw definition quality (best seen from side profiles): Sharp, defined jawline = good drainage. Soft, blurred, or undefined jawline = poor drainage/congestion. Compare jawline sharpness from side angles.
+   - Submental pooling (area under chin/jaw): Clean, defined area under the chin = good drainage. Soft "double chin" appearance or pooling/fullness under the chin = congestion. Look for fluid/liquid-like pooling in the submental area.
+   - Lower face heaviness: Light, lifted lower face = good drainage. Heavy, drooping, or "sagging" lower face = congestion. Lower face/jaw area appears to weigh down or pool.
+   - Neck/jaw junction clarity (best seen from up angle and side profiles): Clear, defined separation between jaw and neck = good drainage. Blurred, soft, or undefined junction = congestion. Clean neck line where jaw meets neck.
+   
+   Key difference from general water retention: Lymph congestion specifically affects the lower face, jaw, and neck area. It's most visible from side and upward angles where you can see the jaw profile and under-chin area. It manifests as pooling/heaviness in the lower face and neck region, affecting jaw definition.
+   
+   Compare to good drainage: Razor-sharp jaw from side, no pooling under chin, clean neck line. Flag when jaw appears soft/blurred or when there's pooling/heaviness in the lower face and neck area.
+   
    Lymph congestion is best visible from side and upward angles where you can see:
    - Jaw definition quality (sharp vs soft/blurred)
    - Submental pooling (area under chin/jaw)
